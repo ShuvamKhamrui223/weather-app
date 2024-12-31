@@ -22,7 +22,7 @@ const Searchbar = () => {
     >
       <input
         required
-        inputMode="numeric"
+        inputMode="text"
         type="text"
         name="q"
         min={3}
