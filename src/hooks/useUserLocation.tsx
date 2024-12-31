@@ -50,7 +50,8 @@ const useUserLocation = () => {
       },
       {
         enableHighAccuracy: true,
-        maximumAge:30000,timeout:3000
+        maximumAge: 0,
+        timeout: 5000,
       }
     );
   };
