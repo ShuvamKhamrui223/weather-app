@@ -1,23 +1,31 @@
+// internalimports
 import { useQuery } from "@tanstack/react-query";
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ISearched } from "../../types/API_geocoding";
+
+// direct imports
 import SkeletonLoading from "../../components/ui/SkeletonLoading";
+import NotFound from "./components/NotFound";
+
+// dynamic imports
+const CurrentStat = lazy(() => import("../Homepage/components/CurrentStat"));
+const WeatherHighlights = lazy(
+  () => import("../Homepage/components/WeatherHighlights")
+);
+const ForeCast = lazy(() => import("../Homepage/components/ForeCast"));
+
+// types
 import { WeatherData } from "../../types/apiResponse";
-import CurrentStat from "../Homepage/components/CurrentStat";
-import WeatherHighlights from "../Homepage/components/WeatherHighlights";
+import { ISearched } from "../../types/API_geocoding";
+import { IForecast } from "../../types/API_Forecast";
 
 const SearchedResultpage = () => {
   const searchparam = useSearchParams();
   const q = searchparam[0].get("q")?.toLowerCase();
 
   // query to get the lon and lat of searched location
-  const {
-    isLoading: searchLoading,
-    error: searchError,
-    data: searchedData,
-  } = useQuery({
-    queryKey: ["searchquery-to-coord", q],
+  const { isLoading: searchLoading, data: searchedData } = useQuery({
+    queryKey: ["searchquery-to-coord"],
     queryFn: async (): Promise<ISearched | undefined> => {
       const response = await fetch(
         `http://api.openweathermap.org/geo/1.0/direct?q=${q}&appid=${
@@ -44,51 +52,54 @@ const SearchedResultpage = () => {
       );
       return response.json();
     },
-    enabled: !!searchedCoords,
+    enabled: !!q,
   });
 
   // weather forecast data of searched location from lat and lon
-  // const {
-  //   isLoading: searchedforecastLoading,
-  //   error: searchedForecastError,
-  //   data: seachedForecast,
-  // } = useQuery({
-  //   queryKey: ["searched-weather-forecast"],
-  //   queryFn: async (): Promise<IForecast | undefined> => {
-  //     const response = await fetch(
-  //       `https://api.openweathermap.org/data/2.5/forecast?lat=${
-  //         searchedCoords.lat ?? 0
-  //       }&lon=${searchedCoords.lon ?? 0}&appid=${
-  //         import.meta.env.VITE_OPEN_WEATHER_API_KEY
-  //       }&units=metric`
-  //     );
-  //     return response.json();
-  //   },
-  //   enabled: !!searchedCoords,
-  // });
-  if (searchLoading || currentStatLoading) {
+  const {
+    isLoading: searchedforecastLoading,
+    error: searchedForecastError,
+    data: seachedForecast,
+  } = useQuery({
+    queryKey: ["searched-weather-forecast", searchedCoords, currentWeather],
+    queryFn: async (): Promise<IForecast | undefined> => {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${
+          currentWeather?.coord.lat
+        }&lon=${currentWeather?.coord.lon}&appid=${
+          import.meta.env.VITE_OPEN_WEATHER_API_KEY
+        }&units=metric`
+      );
+      return response.json();
+    },
+    enabled: !!currentWeather,
+  });
+
+  if (currentStatLoading || searchLoading || searchedforecastLoading) {
     return <SkeletonLoading />;
   }
-  if (searchError || currentstatError) {
-    return <p>{searchError?.message || currentstatError?.message}</p>;
-  }
+
   if (currentWeather?.cod.toString() === "404") {
-    return <p>no data found</p>;
-  }
-  if (currentWeather) {
-    console.log(currentWeather);
+    return <NotFound />;
   }
 
   if (currentWeather?.cod === 200)
     return (
-      <section className="content-area min-h-screen grid  grid-cols-1 auto-rows-min lg:grid-rows-2 lg:grid-cols-5 xl:grid-cols-4 gap-4">
-        {/* <h2>seach result: {searchparam[0].get("q")}</h2> */}
-        <Suspense>
-          <CurrentStat currentStat={currentWeather} />
+      <section className="content-area md:min-h-screen grid  grid-cols-1 auto-rows-min lg:grid-rows-3 lg:grid-cols-5 xl:grid-cols-4 gap-4">
+        <Suspense fallback={<SkeletonLoading />}>
+          {currentstatError && <p>{currentstatError?.message} </p>}
+          {currentWeather && <CurrentStat currentStat={currentWeather} />}
         </Suspense>
         {/* todays highlights */}
-        <Suspense>
-          <WeatherHighlights highlights={currentWeather} />
+        <Suspense fallback={<SkeletonLoading />}>
+          {currentstatError && <p>{currentstatError?.message} </p>}
+          {currentWeather && <WeatherHighlights highlights={currentWeather} />}
+        </Suspense>
+
+        {/* forecast chart */}
+        <Suspense fallback={<SkeletonLoading />}>
+          {searchedForecastError && <p>{searchedForecastError?.message} </p>}
+          {seachedForecast && <ForeCast forecastData={seachedForecast} />}
         </Suspense>
       </section>
     );

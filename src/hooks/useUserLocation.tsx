@@ -47,6 +47,10 @@ const useUserLocation = () => {
           error: geoLocationError.message,
           isLoading: false,
         });
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge:30000,timeout:3000
       }
     );
   };

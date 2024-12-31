@@ -8,29 +8,34 @@ import {
   YAxis,
 } from "recharts";
 import { IForecast } from "../../../types/API_Forecast";
+import { useLocation } from "react-router-dom";
 
 type ForeCastProps = {
-  forecastData: IForecast;
+  forecastData: IForecast | undefined;
 };
 
 const ForeCast = ({ forecastData }: ForeCastProps) => {
+  const currentPage = useLocation();
   const chartData = forecastData?.list
     .slice(0, 12)
     ?.map((singleDayForecast) => ({
       time: new Intl.DateTimeFormat(navigator.language, {
-        dateStyle: "short",
+        // dateStyle: "short",
         timeStyle: "short",
       }).format(new Date(singleDayForecast.dt * 1000)),
       Temparature: singleDayForecast.main.temp,
     }));
 
   return (
-    <div className="w-full col-start-1 h-[15rem] col-end-5 md:row-start-3 md:row-end-4 lg:row-start-1 lg:col-start-2 lg:col-end-6 rounded-3xl">
+    <div className="w-full col-start-1 h-[20rem] col-end-5 md:row-start-3 md:row-end-4 lg:row-start-1 lg:col-start-3 lg:col-end-6 xl:col-start-2 rounded-3xl my-4 py-6">
       <h2 className="row-start-1 row-end-2 col-span-3 mb-2 text-xl capitalize text-gray-200">
         forecast of 12h
       </h2>
-      <ResponsiveContainer height={"100%"} width={"100%"}>
-        <AreaChart data={chartData}>
+      <ResponsiveContainer height={"100%"} width={"100%"} className={"p-0"}>
+        <AreaChart
+          data={chartData}
+          margin={{ left: -20, bottom: currentPage.pathname !== "/" ? 30 : 0 }}
+        >
           <defs>
             <linearGradient id="Temparature" x1={1} y1={1} x2={0} y2={0}>
               <stop offset={"5%"} stopColor="gray" stopOpacity={0} />
@@ -67,14 +72,14 @@ const ForeCast = ({ forecastData }: ForeCastProps) => {
 
           <XAxis
             dataKey={"time"}
-            angle={0}
-            tickMargin={25}
+            // angle={5}
+            tickMargin={10}
             tickSize={2}
-            fontSize={10}
+            fontSize={12}
             stroke="gray"
           />
 
-          <YAxis stroke="whitesmoke" />
+          <YAxis stroke="gray" tickMargin={8} tickSize={2} fontSize={12} />
 
           <Area
             dot

@@ -1,9 +1,14 @@
+// internalimports
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
 import useUserLocation from "../../hooks/useUserLocation";
-import { WeatherData } from "../../types/apiResponse";
+
+// essential components
 import Alert from "../../components/ui/Alert";
 import SkeletonLoading from "../../components/ui/SkeletonLoading";
+
+// types
+import { WeatherData } from "../../types/apiResponse";
 import { IForecast } from "../../types/API_Forecast";
 
 // dynamic imports
@@ -27,8 +32,10 @@ const Homepage = () => {
     queryKey: ["userLocationData"],
     queryFn: async (): Promise<WeatherData | undefined> => {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates?.latitude
-        }&lon=${coordinates?.longitude}&appid=${import.meta.env.VITE_OPEN_WEATHER_API_KEY
+        `https://api.openweathermap.org/data/2.5/weather?lat=${
+          coordinates?.latitude
+        }&lon=${coordinates?.longitude}&appid=${
+          import.meta.env.VITE_OPEN_WEATHER_API_KEY
         }&units=metric`
       );
       return response.json();
@@ -36,7 +43,7 @@ const Homepage = () => {
     enabled: !!coordinates,
   });
 
-  // historical api
+  // forecast api for last 24 hours data
   const {
     isLoading: historicalDataLoading,
     error: historicalError,
@@ -45,8 +52,10 @@ const Homepage = () => {
     queryKey: ["historicalWeather"],
     queryFn: async (): Promise<IForecast | undefined> => {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${coordinates?.latitude
-        }&lon=${coordinates?.longitude}&appid=${import.meta.env.VITE_OPEN_WEATHER_API_KEY
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${
+          coordinates?.latitude
+        }&lon=${coordinates?.longitude}&appid=${
+          import.meta.env.VITE_OPEN_WEATHER_API_KEY
         }&units=metric`
       );
       return response.json();
@@ -58,7 +67,7 @@ const Homepage = () => {
     return <Alert alertMessage={locationError} />;
   }
 
-  if (isLoading || locationLoading) {
+  if (locationLoading || isLoading) {
     return <SkeletonLoading />;
   }
 
@@ -67,7 +76,7 @@ const Homepage = () => {
   }
 
   return (
-    <section className="content-area min-h-screen grid  grid-cols-1 auto-rows-min lg:grid-rows-2 lg:grid-cols-5 xl:grid-cols-4 gap-4">
+    <section className="lg:content-area min-h-screen grid  grid-cols-2 auto-rows-min lg:grid-rows-2 lg:grid-cols-5 xl:grid-cols-4 gap-4">
       <Suspense>
         <CurrentStat currentStat={weatherData} />
       </Suspense>
