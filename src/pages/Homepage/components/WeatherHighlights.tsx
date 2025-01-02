@@ -1,5 +1,6 @@
 import { BsSunriseFill, BsSunsetFill } from "react-icons/bs";
 import { WeatherData } from "../../../types/apiResponse";
+import { formatNumber, formatTime } from "../../../utils/formaters";
 
 type WeatherHighlightsTypes = {
   highlights: WeatherData | undefined;
@@ -19,11 +20,8 @@ const WeatherHighlights = ({ highlights }: WeatherHighlightsTypes) => {
           <h4 className="text-base capitalize">wind status</h4>
           <div className="flex items-center gap-4">
             <h2 className="text-2xl md:text-3xl font-bold">
-              {new Intl.NumberFormat(navigator.language, {
-                style: "unit",
-                unit: "kilometer-per-hour",
-                unitDisplay: "short",
-              }).format(highlights?.wind?.speed ?? 0)}
+              {typeof highlights?.wind.speed==="number" &&
+                formatNumber(highlights.wind.speed, "unit", "kilometer-per-hour")}
             </h2>
           </div>
         </div>
@@ -45,19 +43,13 @@ const WeatherHighlights = ({ highlights }: WeatherHighlightsTypes) => {
             <div className="flex items-center gap-2">
               <BsSunriseFill className="text-2xl" />
               <h2 className="text-2xl md:text-3xl font-bold">
-                {highlights?.sys.sunrise &&
-                  new Intl.DateTimeFormat(navigator.language, {
-                    hour: "2-digit",
-                  }).format(new Date(highlights?.sys?.sunrise * 1000))}
+                {highlights?.sys.sunrise && formatTime(highlights.sys.sunrise)}
               </h2>
             </div>
             <div className="flex items-center gap-2">
               <BsSunsetFill className="text-2xl" />
               <h2 className="text-2xl md:text-3xl font-bold">
-                {highlights?.sys.sunset &&
-                  new Intl.DateTimeFormat(navigator.language, {
-                    hour: "2-digit",
-                  }).format(new Date(highlights?.sys?.sunset * 1000))}
+                {highlights?.sys.sunset && formatTime(highlights.sys.sunset)}
               </h2>
             </div>
           </div>
@@ -79,11 +71,11 @@ const WeatherHighlights = ({ highlights }: WeatherHighlightsTypes) => {
           <div className="">
             <h2 className="text-2xl md:text-3xl font-bold">
               {highlights?.visibility &&
-                new Intl.NumberFormat(navigator.language, {
-                  style: "unit",
-                  unit: "kilometer",
-                  unitDisplay: "short",
-                }).format(highlights?.visibility / 1000)}
+                formatNumber(
+                  highlights?.visibility / 1000,
+                  "unit",
+                  "kilometer"
+                )}
             </h2>
           </div>
         </div>

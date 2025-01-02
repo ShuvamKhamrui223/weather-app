@@ -2,6 +2,7 @@
 import { useLocation } from "react-router-dom";
 import { WeatherData } from "../../../../types/apiResponse";
 import Searchbar from "./Searchbar";
+import { displayTimeWithOffset } from "../../../../utils/formaters";
 type CurrentStatProps = {
   currentStat: WeatherData | undefined;
 };
@@ -23,13 +24,9 @@ const CurrentStat = ({ currentStat }: CurrentStatProps) => {
         </p>
 
         <p className="capitalize text-sm text-gray-400/80">
-          {/* {currentStat?.dt && getTimeForTimezone(currentStat.dt)} */}
-          {/* {new Date().setMilliseconds(curr)} */}
           <strong className="font-bold uppercase ">
-            {" "}
-            {/* {new Intl.DateTimeFormat(navigator.language, {
-              timeStyle: "short",
-            }).format(new Date().getTime())} */}
+            {new Date().toLocaleDateString()}{" "}
+            {currentStat?.timezone && displayTimeWithOffset(currentStat?.timezone)}
           </strong>
         </p>
       </div>

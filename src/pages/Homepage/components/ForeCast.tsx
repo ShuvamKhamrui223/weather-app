@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { IForecast } from "../../../types/API_Forecast";
 import { useLocation } from "react-router-dom";
+import { formatTime } from "../../../utils/formaters";
 
 type ForeCastProps = {
   forecastData: IForecast | undefined;
@@ -19,10 +20,7 @@ const ForeCast = ({ forecastData }: ForeCastProps) => {
   const chartData = forecastData?.list
     .slice(0, 12)
     ?.map((singleDayForecast) => ({
-      time: new Intl.DateTimeFormat(navigator.language, {
-        // dateStyle: "short",
-        timeStyle: "short",
-      }).format(new Date(singleDayForecast.dt * 1000)),
+      time: formatTime(singleDayForecast.dt),
       Temparature: singleDayForecast.main.temp,
     }));
 
@@ -72,7 +70,6 @@ const ForeCast = ({ forecastData }: ForeCastProps) => {
 
           <XAxis
             dataKey={"time"}
-            // angle={5}
             tickMargin={10}
             tickSize={2}
             fontSize={12}
